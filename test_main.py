@@ -16,3 +16,9 @@ class TestMain(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# Add this at the bottom of your file
+def hello_ci_cd():
+    return "CI/CD pipeline works!"
+
