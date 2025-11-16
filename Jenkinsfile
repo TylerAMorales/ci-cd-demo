@@ -1,7 +1,6 @@
 pipeline {
-    agent any
-    environment {
-        PYTHON_BIN = 'python'
+    agent {
+        docker { image 'python:3.11' }
     }
     stages {
         stage('Checkout') {
@@ -12,10 +11,7 @@ pipeline {
         stage('Setup & Install') {
             steps {
                 sh '''
-                    set -e
-                    if [ ! -d .venv ]; then
-                        python -m venv .venv
-                    fi
+                    python -m venv .venv
                     . .venv/bin/activate
                     pip install --upgrade pip
                     if [ -f requirements.txt ]; then
@@ -27,7 +23,6 @@ pipeline {
         stage('Run Unit Tests') {
             steps {
                 sh '''
-                    set -e
                     . .venv/bin/activate
                     python -m unittest discover -v
                 '''
@@ -35,11 +30,7 @@ pipeline {
         }
     }
     post {
-        success {
-            echo "Build SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}"
-        }
-        failure {
-            echo "Build FAILURE: ${env.JOB_NAME} #${env.BUILD_NUMBER}"
-        }
+        success { echo "Build SUCCESS" }
+        failure { echo "Build FAILURE" }
     }
 }
