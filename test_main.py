@@ -22,3 +22,7 @@ def hello_ci_cd():
     return "CI/CD pipeline works!"
 
 
+# Add this at the bottom of your file
+def hello_ci_cd():
+    return "CI/CD pipeline works!"
+
