@@ -1,6 +1,7 @@
 pipeline {
-    agent {
-        docker { image 'python:3.11' }
+    agent any
+    environment {
+        PYTHON_BIN = 'python3' // or just 'python' if Python 3 is in PATH
     }
     stages {
         stage('Checkout') {
@@ -11,7 +12,7 @@ pipeline {
         stage('Setup & Install') {
             steps {
                 sh '''
-                    python -m venv .venv
+                    $PYTHON_BIN -m venv .venv
                     . .venv/bin/activate
                     pip install --upgrade pip
                     if [ -f requirements.txt ]; then
@@ -24,7 +25,7 @@ pipeline {
             steps {
                 sh '''
                     . .venv/bin/activate
-                    python -m unittest discover -v
+                    $PYTHON_BIN -m unittest discover -v
                 '''
             }
         }
