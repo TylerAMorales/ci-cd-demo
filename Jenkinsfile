@@ -1,38 +1,52 @@
 pipeline {
-    agent {
-        docker {
-            image 'python:3.11'
-        }
+    agent any
+    environment {
+        WEBEX_TOKEN = credentials('webex-token')
+        WEBEX_ROOM  = credentials('webex-room')
     }
-
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-
-        stage('Install Dependencies') {
+        stage('Setup & Install') {
             steps {
-                sh '''
-                    pip install --upgrade pip
-                    pip install -r requirements.txt
-                '''
+                bat """
+                python -m venv .venv
+                .\\.venv\\Scripts\\activate
+                pip install --upgrade pip
+                pip install -r requirements.txt
+                """
             }
         }
-
         stage('Run Unit Tests') {
             steps {
-                sh '''
-                    python -m unittest discover -v
-                '''
+                bat """
+                .\\.venv\\Scripts\\activate
+                python -m unittest discover -v
+                """
             }
         }
     }
-
     post {
-        always {
-            echo "Build finished: ${currentBuild.currentResult}"
+        success {
+            script {
+                bat """
+                curl -s -X POST -H "Authorization: Bearer ${WEBEX_TOKEN}" -H "Content-Type: application/json" ^
+                -d "{\\"roomId\\":\\"${WEBEX_ROOM}\\",\\"text\\":\\"Build SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER} - ${env.BUILD_URL} (tests passed)\\"}" ^
+                https://webexapis.com/v1/messages
+                """
+            }
+        }
+        failure {
+            script {
+                bat """
+                curl -s -X POST -H "Authorization: Bearer ${WEBEX_TOKEN}" -H "Content-Type: application/json" ^
+                -d "{\\"roomId\\":\\"${WEBEX_ROOM}\\",\\"text\\":\\"Build FAILURE: ${env.JOB_NAME} #${env.BUILD_NUMBER} - ${env.BUILD_URL} (check console)\\"}" ^
+                https://webexapis.com/v1/messages
+                """
+            }
         }
     }
 }
