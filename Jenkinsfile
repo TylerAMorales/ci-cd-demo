@@ -1,5 +1,9 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'python:3.11'
+        }
+    }
 
     stages {
         stage('Checkout') {
@@ -11,7 +15,7 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 sh '''
-                    python3 -m pip install --upgrade pip
+                    pip install --upgrade pip
                     pip install -r requirements.txt
                 '''
             }
@@ -20,7 +24,7 @@ pipeline {
         stage('Run Unit Tests') {
             steps {
                 sh '''
-                    python3 -m unittest discover -v
+                    python -m unittest discover -v
                 '''
             }
         }
