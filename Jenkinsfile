@@ -35,3 +35,8 @@ pipeline {
         failure { echo "Build FAILURE" }
     }
 }
+
+
+environment {
+    WEBEX_TOKEN = credentials('WEBEX_BOT_TOKEN')
+}
